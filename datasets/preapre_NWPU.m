@@ -15,12 +15,12 @@ path_den = strcat(output_path, '/den/');mkdir(path_den);
 path_dot = strcat(output_path, '/dot/');mkdir(path_dot);
 path_vis = strcat(output_path, '/vis/');mkdir(path_vis);
 
-img_list = dir(fullfile(strcat(path,'/images/'),'*jpg')); 
+img_list = dir(fullfile(strcat(path,'/images/'),'*jpg'));
 
 
 for i_img = 1:size(img_list,1)
     img_name = img_list(i_img).name;
-    name_split = regexp(img_name, '.jpg', 'split');       
+    name_split = regexp(img_name, '.jpg', 'split');
     mat_name = strcat(name_split{1}, '.mat');
 
     im = imread(strcat(path, '/images/', img_name));
@@ -52,21 +52,21 @@ for i_img = 1:size(img_list,1)
     if save_type(1) == 1
         imwrite(im, strcat(path_img, img_name));
     end
-    
+
     if ~exist(strcat(path, '/mats/',mat_name),'file')
         continue;
     end
-    
-    %% load mat 
+
+    %% load mat
     load(strcat(path, '/mats/',mat_name));
-    
+
     if ~isempty(annPoints)
         annPoints(:,1) = annPoints(:,1)*double(rate_w);
-        annPoints(:,2) = annPoints(:,2)*double(rate_h);   
+        annPoints(:,2) = annPoints(:,2)*double(rate_h);
 
         check_list = ones(size(annPoints,1),1);
         for j = 1:size(annPoints,1)
-            x = ceil(annPoints(j,1)); 
+            x = ceil(annPoints(j,1));
             y = ceil(annPoints(j,2));
             if(x > tmp_w || y > tmp_h || x<=0 || y<=0)
                 check_list(j) = 0;
@@ -77,9 +77,9 @@ for i_img = 1:size(img_list,1)
     end
     %% gen & save labels
     if save_type(2) == 1
-        %% density generation   
-        im_density = get_density_map_gaussian(im,annPoints,15,4); 
-        csvwrite(strcat(path_den, name_split{1}, '.csv'), im_density);       
+        %% density generation
+        im_density = get_density_map_gaussian(im,annPoints,15,4);
+        csvwrite(strcat(path_den, name_split{1}, '.csv'), im_density);
     end
 
     if save_type(3) ==1
@@ -88,15 +88,15 @@ for i_img = 1:size(img_list,1)
         im_dots = uint8(im_dots);
         imwrite(im_dots, strcat(path_dot, name_split{1}, '.png'));
     end
-    
+
     if save_type(4) == 1
-        %% visualization 
+        %% visualization
         if ~isempty(annPoints)
             imRGB = insertShape(im,'FilledCircle',[annPoints(:,1),annPoints(:,2),5*ones(size(annPoints(:,1)))],'Color', {'red'});
         else
             imRGB = im;
         end
-        imwrite(imRGB, strcat(path_vis, name_split{1}, '.jpg'));   
-    end 
-        
+        imwrite(imRGB, strcat(path_vis, name_split{1}, '.jpg'));
+    end
+
 end

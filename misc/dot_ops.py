@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import math
+
+import nn as nn
 import torch
-import torch. nn as nn
+import torch.
 import torch.nn.functional as F
 from torch.autograd import Variable
-import math
+
 
 class Gaussian(nn.Module):
     def __init__(self, in_channels, sigmalist, kernel_size=64, stride=1, padding=0, froze=True):
@@ -25,7 +28,7 @@ class Gaussian(nn.Module):
         kernels = torch.stack(windows)
         kernels = kernels.permute(1, 0, 2, 3, 4)
         weight = kernels.reshape(out_channels, in_channels, kernel_size, kernel_size)
-        
+
         self.gkernel = nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, groups=in_channels, bias=False)
         self.gkernel.weight = torch.nn.Parameter(weight)
 
@@ -34,7 +37,7 @@ class Gaussian(nn.Module):
     def forward(self, dotmaps):
         gaussianmaps = self.gkernel(dotmaps)
         return gaussianmaps
-    
+
     def frozePara(self):
         for para in self.parameters():
             para.requires_grad = False
@@ -48,6 +51,6 @@ class SumPool2d(nn.Module):
             self.area = kernel_size[0] * kernel_size[1]
         else:
             self.area = kernel_size * self.kernel_size
-    
+
     def forward(self, dotmap):
         return self.avgpool(dotmap) * self.area

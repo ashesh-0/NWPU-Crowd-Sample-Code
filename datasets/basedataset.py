@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import torch.utils.data as data
-from . import common
 import os
-from PIL import Image
+
 import numpy as np
 import torch
+import torch.utils.data as data
+from PIL import Image
+
+from . import common
 
 
 class NWPUDataset(data.Dataset):
@@ -16,15 +18,14 @@ class NWPUDataset(data.Dataset):
 
         self.file_name = []
         self.info = []
-        
+
         with open(argv['list_file']) as f:
             lines = f.readlines()
-        
+
         for line in lines:
             splited = line.strip().split()
             self.file_name.append(splited[0])
-            self.info.append(splited[1:3]) # lum, crowd level
-
+            self.info.append(splited[1:3])  # lum, crowd level
 
         self.imgfileTemp = os.path.join(data_path, 'img', '{}.jpg')
         self.matfileTemp = os.path.join(data_path, 'mat', '{}.mat')
@@ -41,29 +42,26 @@ class NWPUDataset(data.Dataset):
         self.dot_transform = None
         if 'dot_transform' in argv.keys():
             self.dot_transform = argv['dot_transform']
-        
+
         if self.mode is 'train':
             print(f'[{self.datasetname} DATASET]: {self.num_samples} training images.')
         if self.mode is 'val':
-            print(f'[{self.datasetname} DATASET]: {self.num_samples} validation images.')   
+            print(f'[{self.datasetname} DATASET]: {self.num_samples} validation images.')
 
-    
     def __getitem__(self, index):
         img, dot = self.read_image_and_gt(index)
-      
+
         if self.main_transform is not None:
-            img, dot = self.main_transform(img, dot) 
+            img, dot = self.main_transform(img, dot)
         if self.img_transform is not None:
             img = self.img_transform(img)
         if self.dot_transform is not None:
             dot = self.dot_transform(dot)
 
-        if self.mode == 'train':    
-            return img, dot  
+        if self.mode == 'train':
+            return img, dot
         elif self.mode == 'val':
-            attributes_pt = torch.from_numpy(np.array(
-                list(map(int, self.info[index]))
-            ))
+            attributes_pt = torch.from_numpy(np.array(list(map(int, self.info[index]))))
             return img, dot, attributes_pt
         else:
             print('invalid data mode!!!')
@@ -71,12 +69,11 @@ class NWPUDataset(data.Dataset):
     def __len__(self):
         return self.num_samples
 
-
-    def read_image_and_gt(self,index):
+    def read_image_and_gt(self, index):
 
         img_path = self.imgfileTemp.format(self.file_name[index])
         dot_path = self.dotfileTemp.format(self.file_name[index])
-       
+
         img = Image.open(img_path)
         dot = Image.open(dot_path)
 
